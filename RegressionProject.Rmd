@@ -5,6 +5,7 @@ date: "28/07/2020"
 output: pdf_document
 ---
 
+
 You work for Motor Trend, a magazine about the automobile industry. Looking at a data set of a collection of cars, they are interested in exploring the relationship between a set of variables and miles per gallon (MPG) (outcome). They are particularly interested in the following two questions:
 
 “Is an automatic or manual transmission better for MPG”
@@ -24,11 +25,11 @@ Checking the corelation of mpg with other variables
 motorData <- mtcars
 cor(motorData$mpg,motorData[,-1])
 ```
-We notice that cyl,disp,hp,wt, carb have a negative co relation with mpg. That means if we keep all other variables constant, With increase in cyl(example) we should see a decrease in mpg
+We notice that cyl,disp,hp,wt, carb have a negative co relation with mpg. That means if we keep all other variables constant, With increase in cyl(example) we should see a decrease in mpg. A plot is present in Appendix 2
 
 # Automatic v/s Manual Transmission 
 
-In the dataset, "am" tells us about the transmission, where 0 = automatic and 1 = manual. Changing numeric vector into a factor vector. The relationship between transmission and mpg can be in seen in plot in Appendix 2
+In the dataset, "am" tells us about the transmission, where 0 = automatic and 1 = manual. Changing numeric vector into a factor vector. The relationship between transmission and mpg can be in seen in plot in Appendix 1
 
 ```{r}
 motorData$am <- as.factor(motorData$am)
@@ -45,4 +46,52 @@ t.test(motorData$mpg~motorData$am,conf.level=0.95)
 
 The p-value is 0.001374 hence we can reject the hypothesis that mean mpg of automatic and manual is the same, we find out that automatic transmission has lower mpg as compared to manual. However, this is with the fact that all other variables are kept constant.
 
+## Finding effect of other variables on mpg
 
+```{r}
+multivariate_model <- lm(data=motorData, mpg ~ .)
+summary(multivariate_model)$coefficients[,1:4]
+```
+
+wt has a lot of effect on the mpg, we will try to find a model which best suits the data and explains most of the variance, we will use the step function
+
+```{r}
+global_multivariate <- step(lm(data=motorData, mpg ~ .), trace=0)
+summary(global_multivariate)
+```
+
+
+The results suggests that the best model includes qsec, wt, and amManual variables. About 85% of the variance is explained by this model. Weight change negatively with mpg around 3.9165miles/ galon every 1000lbs.
+Manual transmission is 2.9mpg better than automatic transmission.
+
+# Summary
+
+On average, manual transmission is better than automatic transmission by 2.9 mpg. However, transmission type is not the only factor accounting for mpg - weight,qsec are also affecting the MPG.
+
+
+# Appendix: Figures
+
+## Appendix 1 : Plot for different Transmissions
+
+```{r}
+library(ggplot2)
+g <- ggplot(motorData, aes(x=factor(am), y=mpg, fill=factor(am)))
+g + geom_boxplot(notch=F) + 
+       scale_x_discrete("Transmission (Automatic or Manual)") +   
+       scale_y_continuous("Miles/gallon") +  
+       ggtitle(" Miles per gallon v/s different transmission")
+
+```
+
+## Appendix 2: Matrix
+
+```{r}
+pairs(mpg ~ ., data = motorData, main="Relationship between all the variables")
+```
+## Appendix 3: Residual Plot
+
+```{r}
+par(mfrow = c(2,2))
+plot(global_multivariate)
+mtext("Residuals", side = 3, line = -2, outer = TRUE)
+```
