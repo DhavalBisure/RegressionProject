@@ -1,0 +1,48 @@
+---
+title: "Relationship between mpg and transmission"
+author: "DBisure"
+date: "28/07/2020"
+output: pdf_document
+---
+
+You work for Motor Trend, a magazine about the automobile industry. Looking at a data set of a collection of cars, they are interested in exploring the relationship between a set of variables and miles per gallon (MPG) (outcome). They are particularly interested in the following two questions:
+
+“Is an automatic or manual transmission better for MPG”
+"Quantify the MPG difference between automatic and manual transmissions"
+
+# Processing the data
+
+```{r}
+summary(mtcars)
+```
+
+# Exploration
+
+Checking the corelation of mpg with other variables
+
+```{r}
+motorData <- mtcars
+cor(motorData$mpg,motorData[,-1])
+```
+We notice that cyl,disp,hp,wt, carb have a negative co relation with mpg. That means if we keep all other variables constant, With increase in cyl(example) we should see a decrease in mpg
+
+# Automatic v/s Manual Transmission 
+
+In the dataset, "am" tells us about the transmission, where 0 = automatic and 1 = manual. Changing numeric vector into a factor vector. The relationship between transmission and mpg can be in seen in plot in Appendix 2
+
+```{r}
+motorData$am <- as.factor(motorData$am)
+levels(motorData$am) <-c("Automatic", "Manual")
+head(motorData)
+```
+
+## Performing a t-test
+  We will perform a t-test to find any signficant difference between manual and auto transmission
+  
+```{r}
+t.test(motorData$mpg~motorData$am,conf.level=0.95)
+```
+
+The p-value is 0.001374 hence we can reject the hypothesis that mean mpg of automatic and manual is the same, we find out that automatic transmission has lower mpg as compared to manual. However, this is with the fact that all other variables are kept constant.
+
+
